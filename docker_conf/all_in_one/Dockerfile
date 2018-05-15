@@ -42,9 +42,10 @@ RUN apt-get update \
         git \
 	lsb-release \
     && pip3 install --upgrade pip \
-    && locale-gen en_US.UTF-8 \
-    && dpkg-reconfigure locales \
-    && pip3 install --upgrade pip \
+    && locale-gen "en_US.UTF-8" \
+    && dpkg-reconfigure locales 
+
+RUN pip3 install --upgrade pip \ 
     && apt-get -f install
 
 ENV LANG en_US.UTF-8
