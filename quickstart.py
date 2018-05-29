@@ -1,56 +1,53 @@
-import os
-import time
-from tempfile import gettempdir
 
-from selenium.common.exceptions import NoSuchElementException
-
+import json
 from instapy import InstaPy
+from instagram_profilecrawl.util.extractor import extract_information
+insta_username = 'zeusfsx'
+insta_password = 'instagrambot'
 
-insta_username = ''
-insta_password = ''
+# if you want to run this script on a server,
+# simply add nogui=True to the InstaPy() constructor
 
-# set headless_browser=True if you want to run InstaPy on a server
 
-# set these in instapy/settings.py if you're locating the
-# library in the /usr/lib/pythonX.X/ directory:
-#   Settings.database_location = '/path/to/instapy.db'
-#   Settings.chromedriver_location = '/path/to/chromedriver'
+session = InstaPy(username=insta_username, password=insta_password, nogui= True)
+session.login()
 
-session = InstaPy(username=insta_username,
-                  password=insta_password,
-                  headless_browser=False,
-                  multi_logs=True)
+browser = session.get_browser()
+
+usernames = []
+#Read instagram_accounts from file
+with open('instagram_accounts.csv','r') as file:
+    temp = file.readlines()
+    for user in temp:
+        usernames.append(user.replace("\n",""))
+
+#SETTINGS:
+#set limit of posts to analyze:
+limit_amount = 36
+    
+print ("Waiting 10 sec")
+browser.implicitly_wait(10)
 
 try:
-    session.login()
 
-    # settings
-    session.set_relationship_bounds(enabled=True,
-				 potency_ratio=-1.21,
-				  delimit_by_numbers=True,
-				   max_followers=4590,
-				    max_following=5555,
-				     min_followers=45,
-				      min_following=77)
-    session.set_do_comment(True, percentage=10)
-    session.set_comments(['aMEIzing!', 'So much fun!!', 'Nicey!'])
-    session.set_dont_include(['friend1', 'friend2', 'friend3'])
-    session.set_dont_like(['pizza', 'girl'])
+    for username in usernames:
+        print('Extracting information from ' + username)
+        information, user_commented_list = extract_information(browser, username, limit_amount)
 
-    # actions
-    session.like_by_tags(['natgeo'], amount=1)
+        with open('./profiles/' + username + '.json', 'w') as fp:
+            fp.write(json.dumps(information, indent=4))
+                                                     
+        print ("Number of users who commented on his/her profile is ", len(user_commented_list),"\n")
+        file = open("./profiles/" + username + "_commenters.txt","w") 
+        for line in user_commented_list:
+            file.write(str(line))
+            file.write('\t')
+            file.write('\r\n')
+        file.close()     
+        print ("\nFinished. The json file and nicknames of users who commented were saved in profiles directory.\n")
 
-except Exception as exc:
-    # if changes to IG layout, upload the file to help us locate the change
-    if isinstance(exc, NoSuchElementException):
-        file_path = os.path.join(gettempdir(), '{}.html'.format(time.strftime('%Y%m%d-%H%M%S')))
-        with open(file_path, 'wb') as fp:
-            fp.write(session.browser.page_source.encode('utf8'))
-        print('{0}\nIf raising an issue, please also upload the file located at:\n{1}\n{0}'.format(
-            '*' * 70, file_path))
-    # full stacktrace when raising Github issue
-    raise
+except KeyboardInterrupt:
+    print('Aborted...')
 
-finally:
-    # end the bot session
-    session.end()
+# end the bot session
+session.end()

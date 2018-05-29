@@ -4,7 +4,7 @@ MAINTAINER Grossmann Tim <contact.timgrossmann@gmail.com>
 
 # Set env variables
 ENV CHROME https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-ENV CRHOMEDRIVER http://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip
+ENV CRHOMEDRIVER http://chromedriver.storage.googleapis.com/2.37/chromedriver_linux64.zip
 
 # Environment setup
 RUN apt-get update \
@@ -51,7 +51,6 @@ RUN pip3 install --upgrade pip \
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
-RUN locale-gen "en_US.UTF-8"
 
 # Installing latest chrome
 RUN cd ~ \
