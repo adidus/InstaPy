@@ -1,0 +1,56 @@
+{
+    "alias": "dima_dodyak",
+    "username": "dima_dodyak",
+    "bio": "",
+    "prof_img": "https://instagram.fdnk1-2.fna.fbcdn.net/vp/025c4d1baa6fb4c64945bd487d18a956/5BA6D3AA/t51.2885-19/s320x320/29739982_235037253737478_8093676431189475328_n.jpg",
+    "num_of_posts": 3,
+    "followers": 87,
+    "following": 94,
+    "posts": [
+        {
+            "caption": "\ud83d\udd1d",
+            "location": {
+                "location_url": "",
+                "location_name": "",
+                "location_id": 0,
+                "latitude": "",
+                "longitude": ""
+            },
+            "img": "https://instagram.fdnk1-2.fna.fbcdn.net/vp/a3359dd216a9ba9c7657b04d24490689/5BBAB2AD/t51.2885-15/e35/29402237_1487639298013046_4171740745792749568_n.jpg",
+            "date": "2018-04-02T07:43:03.000Z",
+            "tags": [],
+            "likes": 53,
+            "comments": 1
+        },
+        {
+            "caption": "\u2764",
+            "location": {
+                "location_url": "https://www.instagram.com/explore/locations/212898659/kyiv-ukraine/",
+                "location_name": "Kyiv, Ukraine",
+                "location_id": "212898659",
+                "latitude": 50.45,
+                "longitude": 30.5233
+            },
+            "img": "https://instagram.fdnk1-2.fna.fbcdn.net/vp/73b1a4ce75c57b4b00515cdf2f8bfd50/5BBC6C04/t51.2885-15/e35/29717543_1251185888348910_5481703026588647424_n.jpg",
+            "date": "2018-04-05T19:24:53.000Z",
+            "tags": [],
+            "likes": 57,
+            "comments": 0
+        },
+        {
+            "caption": "",
+            "location": {
+                "location_url": "",
+                "location_name": "",
+                "location_id": 0,
+                "latitude": "",
+                "longitude": ""
+            },
+            "img": "https://instagram.fdnk1-2.fna.fbcdn.net/vp/fc90942aecf896bc136fbc10c97b354d/5BC1FB50/t51.2885-15/e35/30591886_240237846552710_5684684533912305664_n.jpg",
+            "date": "2018-04-23T19:55:11.000Z",
+            "tags": [],
+            "likes": 57,
+            "comments": -1
+        }
+    ]
+}

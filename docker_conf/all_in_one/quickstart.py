@@ -1,29 +1,52 @@
+
+import json
 from instapy import InstaPy
 
-# Write your automation here
-# Stuck ? Look at the github page or the examples in the examples folder
+insta_username = 'zeusfsx'
+insta_password = 'instagrambot'
 
-dont_like = ['food', 'girl', 'hot']
-ignore_words = ['pizza']
-friend_list = ['friend1', 'friend2', 'friend3']
+# if you want to run this script on a server,
+# simply add nogui=True to the InstaPy() constructor
 
-# If you want to enter your Instagram Credentials directly just enter
-# username=<your-username-here> and password=<your-password> into InstaPy
-# e.g like so InstaPy(username="instagram", password="test1234")
 
-InstaPy() \
-    .login() \
-    .set_relationship_bounds(enabled=True, \
-                 potency_ratio=-1.21, \
-                  delimit_by_numbers=True, \
-                   max_followers=4590, \
-                    max_following=5555, \
-                     min_followers=45, \
-                      min_following=77) \
-    .set_do_comment(True, percentage=10) \
-    .set_comments(['Cool!', 'Awesome!', 'Nice!']) \
-    .set_dont_include(friend_list) \
-    .set_dont_like(dont_like) \
-    .set_ignore_if_contains(ignore_words) \
-    .like_by_tags(['dog', '#cat'], amount=100) \
-    .end()
+session = InstaPy(username=insta_username, password=insta_password, nogui= True)
+session.login()
+
+browser = session.get_browser()
+
+usernames = []
+#Read instagram_accounts from file
+with open('instagram_accounts.csv','r') as file:
+    temp = file.readlines()
+    for user in temp:
+        usernames.append(user.replace("\n",""))
+
+#SETTINGS:
+#set limit of posts to analyze:
+limit_amount = 12
+    
+print ("Waiting 10 sec")
+browser.implicitly_wait(10)
+
+try:
+
+	for username in usernames:
+		print('Extracting information from ' + username)
+		information, user_commented_list = extract_information(browser, username, limit_amount)
+
+		with open('./profiles/' + username + '.json', 'w') as fp:
+			fp.write(json.dumps(information, indent=4))
+                                                     
+		print ("Number of users who commented on his/her profile is ", len(user_commented_list),"\n")
+		file = open("./profiles/" + username + "_commenters.txt","w") 
+		for line in user_commented_list:
+			file.write(str(line))
+			file.write('\t\n')
+		file.close()     
+		print ("\nFinished. The json file and nicknames of users who commented were saved in profiles directory.\n")
+
+except KeyboardInterrupt:
+    print('Aborted...')
+
+# end the bot session
+session.end()

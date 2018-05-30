@@ -52,7 +52,7 @@ from .commenters_util import extract_post_info
 from .commenters_util import extract_information
 from .commenters_util import users_liked
 from .commenters_util import get_photo_urls_from_profile
-
+from .extractor import extract_information, all_extract_post_info
 
 
 class InstaPyError(Exception):
@@ -78,7 +78,7 @@ class InstaPy:
                  multi_logs=False):
 
         if nogui:
-            self.display = Display(visible=0, size=(800, 600))
+            self.display = Display(visible=0, size=(1024, 768))
             self.display.start()
 
         self.browser = None
@@ -174,6 +174,9 @@ class InstaPy:
                          'We\'re working to fix this soon!')
             self.logger.warning(error_msg)
 
+    def get_browser(self):
+        return self.browser
+
     def get_instapy_logger(self, show_logs):
         """
         Handles the creation and retrieval of loggers to avoid re-instantiation.
@@ -237,6 +240,7 @@ class InstaPy:
 
         else:
             chromedriver_location = Settings.chromedriver_location
+            #chromedriver_location = "C:\\Users\\user\\instapy\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
             chrome_options = Options()
             chrome_options.add_argument('--dns-prefetch-disable')
             chrome_options.add_argument('--no-sandbox')
@@ -271,13 +275,12 @@ class InstaPy:
             }
             chrome_options.add_experimental_option('prefs', chrome_prefs)
             try:
-                self.browser = webdriver.Chrome(chromedriver_location,
-                                                desired_capabilities=capabilities,
-                                                chrome_options=chrome_options)
+                
+                self.browser = webdriver.Chrome(chromedriver_location, desired_capabilities=capabilities, chrome_options=chrome_options)
             except selenium.common.exceptions.WebDriverException as exc:
                 self.logger.exception(exc)
                 raise InstaPyError('ensure chromedriver is installed at {}'.format(
-                    Settings.chromedriver_location))
+                    chromedriver_location))
 
             # prevent: Message: unknown error: call function result missing 'value'
             matches = re.match(r'^(\d+\.\d+)',
@@ -2193,3 +2196,107 @@ class InstaPy:
         self.inap_img += inap_img
 
         return self
+
+    def accounts_to_json(self,usernames,limit_amount=12):
+            
+        self.logger.info("Waiting 10 sec")
+        self.browser.implicitly_wait(10)
+        #path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
+        path_to_profiles = '../profiles/'
+        try:
+
+            for username in usernames:
+                self.logger.info('Extracting information from ' + username)
+                information, user_commented_list = extract_information(self.browser, username, limit_amount)
+
+                with open(path_to_profiles + username + '.json', 'w') as fp:
+                    fp.write(json.dumps(information, indent=4))
+                                                             
+                print ("Number of users who commented on his/her profile is ", len(user_commented_list),"\n")
+                file = open(path_to_profiles + username + "_commenters.txt","w") 
+                for line in user_commented_list:
+                    file.write(str(line))
+                    file.write('\t\n')
+                file.close()     
+                self.logger.info("\nFinished. The json file and nicknames of users who commented were saved in profiles directory.\n")
+
+        except KeyboardInterrupt:
+            print('Aborted...')
+    def feeds_to_json(self,limit_amount=8):
+        """
+            limit_amount need to be multiple 8
+        """
+        num_of_search = 0
+        amount = 0
+        links = []
+        num_of_links = len(links)
+        while num_of_links < limit_amount :
+            links.extend(
+                get_links_from_feed(self.browser, 
+                                        amount,
+                                        num_of_search,
+                                        self.logger))
+            num_of_search += 1
+            num_of_links = len(links) + 1
+        posts_info = []    
+        browser_ = self.browser
+        counter = 1
+        for link in links:
+            
+            print ("\n", counter , "/", len(links))
+            counter = counter + 1
+      
+            print ("\nScrapping link: ", link)
+            browser_.get(link)
+            try:
+                post = self.browser.find_element_by_class_name('_622au')
+                username = post.find_element_by_class_name('_iadoq').text
+
+                caption=''
+                location_url = ''
+                location_name = ''
+                location_id = ''
+                lat = ''
+                lng = '' 
+                img = ''
+                tags = []
+                likes = 0
+                comments = 0
+                date = ''
+                user_commented_list = []
+
+                caption, location_url, location_name, location_id, lat, lng, img, tags, likes, comments, date, user_commented_list = all_extract_post_info(browser_)
+
+                location = {
+                    'location_url': location_url,
+                    'location_name': location_name,
+                    'location_id': location_id,
+                    'latitude': lat,
+                    'longitude': lng
+                  }
+
+                posts_info.append({
+                    'username' : username,
+                    'caption': caption,
+                    'location': location,
+                    'img': img,
+                    'date': date,
+                    'tags': tags,
+                    'likes': likes,
+                    'comments': comments,
+                    'user_commented': user_commented_list
+                  })
+              
+            except NoSuchElementException:
+                print('- Could not get information from post: ' + link)
+
+        path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
+        time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+        with open(path_to_profiles + str(time) + '.json', 'w') as fp:
+            fp.write(json.dumps(posts_info, indent=4))
+        self.logger.info("\nFinished. The json were saved in profiles directory.\n")     
+        return self
+
+	
+	
+
