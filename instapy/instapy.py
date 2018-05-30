@@ -239,8 +239,8 @@ class InstaPy:
             self.browser = webdriver.Firefox(firefox_profile=firefox_profile)
 
         else:
-            #chromedriver_location = Settings.chromedriver_location
-            chromedriver_location = "C:\\Users\\user\\instapy\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
+            chromedriver_location = Settings.chromedriver_location
+            #chromedriver_location = "C:\\Users\\user\\instapy\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
             chrome_options = Options()
             chrome_options.add_argument('--dns-prefetch-disable')
             chrome_options.add_argument('--no-sandbox')
@@ -275,7 +275,7 @@ class InstaPy:
             }
             chrome_options.add_experimental_option('prefs', chrome_prefs)
             try:
-                print("Zasranec")
+                
                 self.browser = webdriver.Chrome(chromedriver_location, desired_capabilities=capabilities, chrome_options=chrome_options)
             except selenium.common.exceptions.WebDriverException as exc:
                 self.logger.exception(exc)
@@ -2201,7 +2201,8 @@ class InstaPy:
             
         self.logger.info("Waiting 10 sec")
         self.browser.implicitly_wait(10)
-        path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
+        #path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
+        path_to_profiles = '../profiles/'
         try:
 
             for username in usernames:
