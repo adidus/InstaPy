@@ -52,7 +52,9 @@ from .commenters_util import extract_post_info
 from .commenters_util import extract_information
 from .commenters_util import users_liked
 from .commenters_util import get_photo_urls_from_profile
-from .extractor import extract_information, all_extract_post_info
+from .extractor import extract_information
+from .extractor import all_extract_post_info
+from .extractor import difference_between_two_list
 
 
 class InstaPyError(Exception):
@@ -86,7 +88,7 @@ class InstaPy:
         self.proxy_address = proxy_address
         self.proxy_port = proxy_port
         self.proxy_chrome_extension = proxy_chrome_extension
-
+        self.old_feeds_link = []
         self.username = username or os.environ.get('INSTA_USER')
         self.password = password or os.environ.get('INSTA_PW')
         self.nogui = nogui
@@ -239,8 +241,8 @@ class InstaPy:
             self.browser = webdriver.Firefox(firefox_profile=firefox_profile)
 
         else:
-            chromedriver_location = Settings.chromedriver_location
-            #chromedriver_location = "C:\\Users\\user\\instapy\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
+            #chromedriver_location = Settings.chromedriver_location
+            chromedriver_location = "C:\\Users\\user\\instapy\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
             chrome_options = Options()
             chrome_options.add_argument('--dns-prefetch-disable')
             chrome_options.add_argument('--no-sandbox')
@@ -2202,7 +2204,8 @@ class InstaPy:
         self.logger.info("Waiting 10 sec")
         self.browser.implicitly_wait(10)
         #path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
-        path_to_profiles = '../profiles/'
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
         try:
 
             for username in usernames:
@@ -2226,6 +2229,7 @@ class InstaPy:
         """
             limit_amount need to be multiple 8
         """
+
         num_of_search = 0
         amount = 0
         links = []
@@ -2241,12 +2245,13 @@ class InstaPy:
         posts_info = []    
         browser_ = self.browser
         counter = 1
+        links = difference_between_two_list(links,self.old_feeds_link)[:]
         for link in links:
             
             print ("\n", counter , "/", len(links))
             counter = counter + 1
       
-            print ("\nScrapping link: ", link)
+            print("\nScrapping link: ", link)
             browser_.get(link)
             try:
                 post = self.browser.find_element_by_class_name('_622au')
@@ -2290,11 +2295,44 @@ class InstaPy:
             except NoSuchElementException:
                 print('- Could not get information from post: ' + link)
 
-        path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
+        #path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
         time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+        self.old_feeds_link = links[:]
         with open(path_to_profiles + str(time) + '.json', 'w') as fp:
             fp.write(json.dumps(posts_info, indent=4))
-        self.logger.info("\nFinished. The json were saved in profiles directory.\n")     
+        self.logger.info("\nFinished. The json were saved in profiles directory.\n")  
+        return self
+
+    def google_to_json(self,request):
+
+        self.logger.info("Get information from Google")
+        request.replace(" ","+")
+        self.browser.get('https://www.google.com.ua/search?q='+request)
+        try:
+            search = self.browser.find_elements_by_class_name('r')
+            links = []
+            for link in search:
+                links.append(
+                    link.find_element_by_tag_name('a').get_attribute('href')
+                )
+
+            google = {
+                'request': request,
+                'links': links
+            }
+            
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
+            time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+
+            with open(path_to_profiles + 'google' + str(time) + '.json', 'w') as fp:
+                fp.write(json.dumps(google, indent=4))
+            self.logger.info("Finished get information from Google")
+        except:
+            self.logger.info("No documents" +request+"found for request.")
+
         return self
 
 	

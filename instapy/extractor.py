@@ -5,6 +5,14 @@ import math
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 import requests
+def difference_between_two_list(list_1,list_2):
+  index = 0
+  if list_1 and list_2:
+    first_element = list_2[0]
+    for idx,item in enumerate(list_1):
+      if item == first_element:
+
+
 
 def get_user_info(browser):
   """Get the basic user info from the profile screen"""
@@ -87,8 +95,8 @@ def all_extract_post_info(browser):
   imgs = post.find_elements_by_tag_name('img')
   img = ''
 
-  #if len(imgs) >= 1:
-  img = imgs[1].get_attribute('src')
+  if len(imgs) >= 2:
+    img = imgs[1].get_attribute('src')
     
   #print(img)
   likes = 0
