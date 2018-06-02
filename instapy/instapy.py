@@ -55,7 +55,7 @@ from .commenters_util import get_photo_urls_from_profile
 from .extractor import extract_information
 from .extractor import all_extract_post_info
 from .extractor import difference_between_two_list
-
+from .extractor import extract_by_time_from_google
 
 class InstaPyError(Exception):
     """General error for InstaPy exceptions"""
@@ -2305,35 +2305,47 @@ class InstaPy:
         self.logger.info("\nFinished. The json were saved in profiles directory.\n")  
         return self
 
-    def google_to_json(self,request):
-
+    def google_to_json(self,request,time = 0):
+        '''
+			If  Time = 1 this is the last 24 hours
+				Time = 2 this is the last week
+				Time = 3 this is the last month
+				Time = 0 this is the any time
+    	'''
         self.logger.info("Get information from Google")
         request.replace(" ","+")
         self.browser.get('https://www.google.com.ua/search?q='+request)
-        try:
-            search = self.browser.find_elements_by_class_name('r')
-            links = []
-            for link in search:
-                links.append({
-                	'title':link.find_element_by_tag_name('a').text,
-                    'url':link.find_element_by_tag_name('a').get_attribute('href')
-                }
-                )
 
-            google = {
-                'request': request,
-                'links': links
-            }
+        
+        url, time  = extract_by_time_from_google(self.browser,time)
+
+        if url is not None:
+            self.browser.get(url)
+
+        
+        search = self.browser.find_elements_by_class_name('r')
+        links = []
+        for link in search:
+            links.append({
+                'title':link.find_element_by_tag_name('a').text,
+                'url':link.find_element_by_tag_name('a').get_attribute('href')
+            })
+
+        google = {
+            'freshness': time,
+            'request': request,
+            'links': links
+        }
             
-            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
-            time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-
-            with open(path_to_profiles + 'google' + str(time) + '.json', 'w') as fp:
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
+        time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+        try:
+            with open(path_to_profiles + 'google_' + str(time) + '.json', 'w') as fp:
                 fp.write(json.dumps(google, indent=4))
             self.logger.info("Finished get information from Google")
         except:
-            self.logger.info("No documents" +request+"found for request.")
+            self.logger.info("No documents " +request+" found for request.")
 
         return self
 

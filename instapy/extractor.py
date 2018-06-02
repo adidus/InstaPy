@@ -17,7 +17,7 @@ def difference_between_two_list(list_1,list_2):
           break
       return list_1[:index]
     else:
-      eturn list_1
+      return list_1
   else:
     return list_1
 
@@ -299,3 +299,25 @@ def extract_information(browser, username, limit_amount):
       last = user_commented_total_list[i]     
 
   return information, user_commented_list
+
+def extract_by_time_from_google(browser,time=0):
+
+  if time == 0:
+    return None, "Any time"
+  #browser.find_element_by_xpath('//*[@id="hdtb-tls"]').click()
+
+  if time == 1:
+    link = browser.find_element_by_id('qdr_d')\
+                  .find_element_by_tag_name('a')\
+                  .get_attribute("href")
+    return link, 'The last 24 hours'
+  elif time == 2:
+    link = browser.find_element_by_id('qdr_w')\
+                  .find_element_by_tag_name('a')\
+                  .get_attribute("href")
+    return link, 'The last week'
+  elif time == 3:
+    link = browser.find_element_by_id('qdr_m')\
+                  .find_element_by_tag_name('a')\
+                  .get_attribute("href")
+    return link, 'The last month'
