@@ -2314,8 +2314,10 @@ class InstaPy:
             search = self.browser.find_elements_by_class_name('r')
             links = []
             for link in search:
-                links.append(
-                    link.find_element_by_tag_name('a').get_attribute('href')
+                links.append({
+                	'title':link.find_element_by_tag_name('a').text,
+                    'url':link.find_element_by_tag_name('a').get_attribute('href')
+                }
                 )
 
             google = {

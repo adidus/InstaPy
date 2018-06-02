@@ -5,14 +5,21 @@ import math
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 import requests
+
 def difference_between_two_list(list_1,list_2):
   index = 0
   if list_1 and list_2:
-    first_element = list_2[0]
-    for idx,item in enumerate(list_1):
-      if item == first_element:
-
-
+    if list_2[0] in list_1:
+      first_element = list_2[0]
+      for idx,item in enumerate(list_1):
+        if item == first_element:
+          index = idx
+          break
+      return list_1[:index]
+    else:
+      eturn list_1
+  else:
+    return list_1
 
 def get_user_info(browser):
   """Get the basic user info from the profile screen"""
