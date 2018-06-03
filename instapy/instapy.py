@@ -242,7 +242,7 @@ class InstaPy:
 
         else:
             #chromedriver_location = Settings.chromedriver_location
-            chromedriver_location = "C:\\Users\\user\\instapy\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
+            chromedriver_location = "C:\\Users\\user\\instapy\\temp\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
             chrome_options = Options()
             chrome_options.add_argument('--dns-prefetch-disable')
             chrome_options.add_argument('--no-sandbox')
@@ -2332,10 +2332,10 @@ class InstaPy:
             })
 
         google = {
-            'freshness': time,
+        	'freshness': time,
             'request': request,
             'links': links
-        }
+            }
             
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
@@ -2348,6 +2348,39 @@ class InstaPy:
             self.logger.info("No documents " +request+" found for request.")
 
         return self
+    def google_login(self,mail_address,password):
+        try:
+            url = 'https://www.google.com/accounts/Login?hl=en&continue=http://www.google.co.uk/'
+            self.browser.get(url)
+            self.browser.find_element_by_id("identifierId").send_keys(mail_address)
+            self.browser.find_element_by_id("identifierNext").click()
+            sleep(2)
+            self.browser.find_element_by_name("password").send_keys(password)
+            self.browser.find_element_by_id("passwordNext").click()
+            self.google = True
+            sleep(10)
+        except:
+            self.logger.info("Couldn`t login to Google")
+        return self
+
+    def google_logout(self):
+
+        if not self.google:
+            self.logger.info("Couldn`t logout from Google")
+            return self
+        else:
+            try:
+                url = 'https://www.google.com'
+                self.browser.get(url)
+                exit_url = self.browser.find_element_by_id("gb_71").get_attribute('href')
+                self.browser.get(exit_url)
+                sleep(5)
+            except:
+                self.logger.info("Couldn`t logout from Google")
+                return self
+
+
+
 
 	
 	

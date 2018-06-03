@@ -304,7 +304,7 @@ def extract_by_time_from_google(browser,time=0):
 
   if time == 0:
     return None, "Any time"
-  #browser.find_element_by_xpath('//*[@id="hdtb-tls"]').click()
+  #browser.find_element_by_xpath('//*[@id="gb_71"]').click()
 
   if time == 1:
     link = browser.find_element_by_id('qdr_d')\
