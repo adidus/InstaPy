@@ -55,7 +55,6 @@ from .commenters_util import get_photo_urls_from_profile
 from .extractor import extract_information
 from .extractor import all_extract_post_info
 from .extractor import difference_between_two_list
-from .extractor import extract_by_time_from_google
 
 class InstaPyError(Exception):
     """General error for InstaPy exceptions"""
@@ -2210,21 +2209,15 @@ class InstaPy:
 
             for username in usernames:
                 self.logger.info('Extracting information from ' + username)
-                information, user_commented_list = extract_information(self.browser, username, limit_amount)
+                information = extract_information(self.browser, username, limit_amount)
 
                 with open(path_to_profiles + username + '.json', 'w') as fp:
-                    fp.write(json.dumps(information, indent=4))
-                                                             
-                print ("Number of users who commented on his/her profile is ", len(user_commented_list),"\n")
-                file = open(path_to_profiles + username + "_commenters.txt","w") 
-                for line in user_commented_list:
-                    file.write(str(line))
-                    file.write('\t\n')
-                file.close()     
-                self.logger.info("\nFinished. The json file and nicknames of users who commented were saved in profiles directory.\n")
+                    fp.write(json.dumps(information, indent=4))    
+                self.logger.info("\nFinished. The json file of usesaved in profiles directory.\n")
 
         except KeyboardInterrupt:
             print('Aborted...')
+
     def feeds_to_json(self,limit_amount=8):
         """
             limit_amount need to be multiple 8
@@ -2243,55 +2236,19 @@ class InstaPy:
             num_of_search += 1
             num_of_links = len(links) + 1
         posts_info = []    
-        browser_ = self.browser
         counter = 1
         links = difference_between_two_list(links,self.old_feeds_link)[:]
+        
         for link in links:
-            
             print ("\n", counter , "/", len(links))
             counter = counter + 1
-      
-            print("\nScrapping link: ", link)
-            browser_.get(link)
+            link = link + '?__a=1'
+            self.browser.get(link)
+            sleep(2)
+            print ("\nScrapping link: ", link)
             try:
-                post = self.browser.find_element_by_class_name('_622au')
-                username = post.find_element_by_class_name('_iadoq').text
-
-                caption=''
-                location_url = ''
-                location_name = ''
-                location_id = ''
-                lat = ''
-                lng = '' 
-                img = ''
-                tags = []
-                likes = 0
-                comments = 0
-                date = ''
-                user_commented_list = []
-
-                caption, location_url, location_name, location_id, lat, lng, img, tags, likes, comments, date, user_commented_list = all_extract_post_info(browser_)
-
-                location = {
-                    'location_url': location_url,
-                    'location_name': location_name,
-                    'location_id': location_id,
-                    'latitude': lat,
-                    'longitude': lng
-                  }
-
-                posts_info.append({
-                    'username' : username,
-                    'caption': caption,
-                    'location': location,
-                    'img': img,
-                    'date': date,
-                    'tags': tags,
-                    'likes': likes,
-                    'comments': comments,
-                    'user_commented': user_commented_list
-                  })
-              
+                post = all_extract_post_info(self.browser)
+                posts_info.append(post)
             except NoSuchElementException:
                 print('- Could not get information from post: ' + link)
 
@@ -2302,86 +2259,5 @@ class InstaPy:
         self.old_feeds_link = links[:]
         with open(path_to_profiles + str(time) + '.json', 'w') as fp:
             fp.write(json.dumps(posts_info, indent=4))
-        self.logger.info("\nFinished. The json were saved in profiles directory.\n")  
+        self.logger.info("\nFinished. The json of news has saved in profiles directory.\n")  
         return self
-
-    def google_to_json(self,request,time = 0):
-        '''
-			If  Time = 1 this is the last 24 hours
-				Time = 2 this is the last week
-				Time = 3 this is the last month
-				Time = 0 this is the any time
-    	'''
-        self.logger.info("Get information from Google")
-        request.replace(" ","+")
-        self.browser.get('https://www.google.com.ua/search?q='+request)
-
-        
-        url, time  = extract_by_time_from_google(self.browser,time)
-
-        if url is not None:
-            self.browser.get(url)
-
-        
-        search = self.browser.find_elements_by_class_name('r')
-        links = []
-        for link in search:
-            links.append({
-                'title':link.find_element_by_tag_name('a').text,
-                'url':link.find_element_by_tag_name('a').get_attribute('href')
-            })
-
-        google = {
-        	'freshness': time,
-            'request': request,
-            'links': links
-            }
-            
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
-        time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-        try:
-            with open(path_to_profiles + 'google_' + str(time) + '.json', 'w') as fp:
-                fp.write(json.dumps(google, indent=4))
-            self.logger.info("Finished get information from Google")
-        except:
-            self.logger.info("No documents " +request+" found for request.")
-
-        return self
-    def google_login(self,mail_address,password):
-        try:
-            url = 'https://www.google.com/accounts/Login?hl=en&continue=http://www.google.co.uk/'
-            self.browser.get(url)
-            self.browser.find_element_by_id("identifierId").send_keys(mail_address)
-            self.browser.find_element_by_id("identifierNext").click()
-            sleep(2)
-            self.browser.find_element_by_name("password").send_keys(password)
-            self.browser.find_element_by_id("passwordNext").click()
-            self.google = True
-            sleep(10)
-        except:
-            self.logger.info("Couldn`t login to Google")
-        return self
-
-    def google_logout(self):
-
-        if not self.google:
-            self.logger.info("Couldn`t logout from Google")
-            return self
-        else:
-            try:
-                url = 'https://www.google.com'
-                self.browser.get(url)
-                exit_url = self.browser.find_element_by_id("gb_71").get_attribute('href')
-                self.browser.get(exit_url)
-                sleep(5)
-            except:
-                self.logger.info("Couldn`t logout from Google")
-                return self
-
-
-
-
-	
-	
-
