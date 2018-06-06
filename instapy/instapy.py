@@ -8,7 +8,7 @@ import os
 from platform import python_version
 from datetime import datetime
 import random
-
+import platform
 import selenium
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -240,8 +240,11 @@ class InstaPy:
             self.browser = webdriver.Firefox(firefox_profile=firefox_profile)
 
         else:
-            #chromedriver_location = Settings.chromedriver_location
-            chromedriver_location = "C:\\Users\\user\\instapy\\temp\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
+            if platform.system() == 'Linux':
+                chromedriver_location = "/usr/local/bin/chromedriver"
+            else:
+                BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                chromedriver_location = os.path.join(BASE_DIR, 'assets/chromedriver/chromedriver.exe')
             chrome_options = Options()
             chrome_options.add_argument('--dns-prefetch-disable')
             chrome_options.add_argument('--no-sandbox')
