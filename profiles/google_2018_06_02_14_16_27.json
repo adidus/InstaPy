@@ -1,0 +1,46 @@
+{
+    "freshness": "The last month",
+    "request": "what is it json?",
+    "links": [
+        {
+            "title": "JSON.stringify() - JavaScript | MDN",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify"
+        },
+        {
+            "title": "JSON - JavaScript | MDN",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON"
+        },
+        {
+            "title": "JSON - its advantages and disadvantages | JSON Web Service PHP",
+            "url": "https://ezeelive.com/json-advantages-disadvantages/"
+        },
+        {
+            "title": "Introduction to Tweet JSON \u2014 Twitter Developers",
+            "url": "https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/intro-to-tweet-json.html"
+        },
+        {
+            "title": "javascript - What is difference between angular.fromJson and JSON ...",
+            "url": "https://stackoverflow.com/questions/34692279/what-is-difference-between-angular-fromjson-and-json-parse"
+        },
+        {
+            "title": "json-rules-engine - npm",
+            "url": "https://www.npmjs.com/package/json-rules-engine"
+        },
+        {
+            "title": "Publishing JSON Schema Documentation With Docson - DZone Web ...",
+            "url": "https://dzone.com/articles/publishing-json-schema-documentaton-with-docson"
+        },
+        {
+            "title": "Package 'rjson' - CRAN-R",
+            "url": "https://cran.r-project.org/web/packages/rjson/rjson.pdf"
+        },
+        {
+            "title": "What is the purpose of listing current root.json version in the snapshot ...",
+            "url": "https://github.com/theupdateframework/specification/issues/12"
+        },
+        {
+            "title": "JSON path - IBM Watson - IBM Data Science Experience",
+            "url": "https://datascience.ibm.com/docs/content/streaming-pipelines/JSON.html"
+        }
+    ]
+}
