@@ -55,6 +55,9 @@ from .commenters_util import get_photo_urls_from_profile
 from .extractor import extract_information
 from .extractor import all_extract_post_info
 from .extractor import difference_between_two_list
+from .extractor import instaimport
+from .config import apiserver, http_login, http_password, port, maincollection, mainindex
+
 
 class InstaPyError(Exception):
     """General error for InstaPy exceptions"""
@@ -2214,6 +2217,8 @@ class InstaPy:
                 self.logger.info('Extracting information from ' + username)
                 information = extract_information(self.browser, username, limit_amount)
 
+                print(self.export(information))
+
                 with open(path_to_profiles + username + '.json', 'w') as fp:
                     fp.write(json.dumps(information, indent=4))    
                 self.logger.info("\nFinished. The json file of usesaved in profiles directory.\n")
@@ -2264,3 +2269,8 @@ class InstaPy:
             fp.write(json.dumps(posts_info, indent=4))
         self.logger.info("\nFinished. The json of news has saved in profiles directory.\n")  
         return self
+
+    def export(self,json = None):
+        instaimport(maincollection, mainindex, json)
+        return True
+

@@ -7,6 +7,8 @@ from selenium.webdriver.common.keys import Keys
 import requests
 from datetime import datetime
 import json
+from elasticsearch import Elasticsearch
+
 
 def difference_between_two_list(list_1,list_2):
   index = 0
@@ -35,8 +37,8 @@ def get_user_info(browser):
   num_of_posts = data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["count"]
   followers = data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_followed_by"]["count"]
   following = data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_follow"]["count"]
-  
-  return alias_name, bio, prof_img, num_of_posts, followers, following
+  user_id = data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["id"]
+  return alias_name, bio, prof_img, num_of_posts, followers, following, user_id
 
 
 def all_extract_post_info(browser):
@@ -52,7 +54,7 @@ def extract_information(browser, username, limit_amount):
     browser.get('https://www.instagram.com/' + username)
 
     try:
-        alias_name, bio, prof_img, num_of_posts, followers, following  = get_user_info(browser)
+        alias_name, bio, prof_img, num_of_posts, followers, following, user_id  = get_user_info(browser)
         if limit_amount <1 :
             limit_amount = 999999
         num_of_posts = min(limit_amount, num_of_posts)
@@ -130,9 +132,10 @@ def extract_information(browser, username, limit_amount):
       except NoSuchElementException:
         print('- Could not get information from post: ' + link)
         
-    time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    time = datetime.now()
 
     information = {
+            'id':user_id,
             'full_name': alias_name,
             'username': username,
             'bio': bio,
@@ -140,8 +143,27 @@ def extract_information(browser, username, limit_amount):
             'num_of_posts': num_of_posts,
             'followers': followers,
             'following': following,
-            'time_of_scrapping':time,
+            'timestamp':int(time.timestamp()),
             'posts': post_infos     
     }
 
     return information
+
+def instaimport(searchindex,thisdoctype,newsbody):
+    # Index by Elastic
+    es = Elasticsearch(
+        ['media-audit.com'],
+        http_auth=('elastic', 'changeme'),
+        port=9200
+    )
+
+    if newsbody:
+        searchindex = 'instagram'
+        try:
+            es.create(index=searchindex, doc_type=thisdoctype, body=newsbody, id=newsbody['id'])
+
+        except:
+            es.delete(index=searchindex, doc_type=thisdoctype, body=newsbody, id=newsbody['id'])
+            print("Skip")
+
+    return 'ok'
