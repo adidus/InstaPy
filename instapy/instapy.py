@@ -2212,16 +2212,28 @@ class InstaPy:
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
         try:
-
+            relax_point = random.randint(15, 20)
+            total_accounts = 0
             for username in usernames:
                 self.logger.info('Extracting information from ' + username)
                 information = extract_information(self.browser, username, limit_amount)
 
                 print(self.export(information))
 
-                with open(path_to_profiles + username + '.json', 'w') as fp:
-                    fp.write(json.dumps(information, indent=4))    
-                self.logger.info("\nFinished. The json file of usesaved in profiles directory.\n")
+                total_accounts += 1
+
+                if total_accounts == relax_point :
+                    time_for_sleeping = random.randint(600,800)
+                    print("After {0} accounts. I go to sleep on {1} seconds. See you later\n".format(relax_point,time_for_sleeping))
+                    relax_point = random.randint(15, 20)
+                    total_accounts = 0
+                    sleep(time_for_sleeping)
+                    print("I start working\n")
+
+
+                #with open(path_to_profiles + username + '.json', 'w') as fp:
+                #    fp.write(json.dumps(information, indent=4))
+                #self.logger.info("\nFinished. The json file of usesaved in profiles directory.\n")
 
         except KeyboardInterrupt:
             print('Aborted...')
