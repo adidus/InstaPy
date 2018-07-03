@@ -2271,6 +2271,6 @@ class InstaPy:
         return self
 
     def export(self,json = None):
-        instaimport(maincollection, mainindex, json)
-        return True
+        result = instaimport(maincollection, mainindex, json)
+        return result
 

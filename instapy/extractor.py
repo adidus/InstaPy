@@ -52,7 +52,7 @@ def extract_information(browser, username, limit_amount):
     """Get all the information for the given username"""
 
     browser.get('https://www.instagram.com/' + username)
-
+    num_of_posts = 0
     try:
         alias_name, bio, prof_img, num_of_posts, followers, following, user_id  = get_user_info(browser)
         if limit_amount <1 :
@@ -163,7 +163,13 @@ def instaimport(searchindex,thisdoctype,newsbody):
             es.create(index=searchindex, doc_type=thisdoctype, body=newsbody, id=newsbody['id'])
 
         except:
-            es.delete(index=searchindex, doc_type=thisdoctype, body=newsbody, id=newsbody['id'])
-            print("Skip")
+            es.delete(index=searchindex, doc_type=thisdoctype, id=newsbody['id'])
+            print('Delete Id =' + newsbody['id'])
+            try:
+                es.create(index=searchindex, doc_type=thisdoctype, body=newsbody, id=newsbody['id'])
+                print('Id = ' + newsbody['id'] + ' was upload \n')
+            except:
+                es.delete(index=searchindex, doc_type=thisdoctype, id=newsbody['id'])
+                print("Skip")
 
     return 'ok'
