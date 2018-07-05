@@ -53,6 +53,13 @@ def extract_information(browser, username, limit_amount):
 
     browser.get('https://www.instagram.com/' + username)
     num_of_posts = 0
+    user_id = 0
+    alias_name = ''
+    bio = ''
+    followers = 0
+    following = 0
+    prof_img = ''
+    links2 = []
     try:
         alias_name, bio, prof_img, num_of_posts, followers, following, user_id  = get_user_info(browser)
         if limit_amount <1 :
@@ -60,6 +67,7 @@ def extract_information(browser, username, limit_amount):
         num_of_posts = min(limit_amount, num_of_posts)
     except:
         print ("\nError: Couldn't get user profile.")
+        return None
 
       #prev_divs = browser.find_elements_by_class_name('_70iju')
 
@@ -101,18 +109,22 @@ def extract_information(browser, username, limit_amount):
           ##remove bellow part to never break the scrolling script before reaching the num_of_posts
             if (len(links2) == previouslen):
                 breaking += 1
-                print ("breaking in ",4-breaking,"...\nIf you believe this is only caused by slow internet, increase sleep time in line 149 in extractor.py")
+                print ("breaking in ",4-breaking,"...\nIf you believe this is only caused by slow internet, increase sleep time in line 112 in extractor.py")
             else:
                 breaking = 0
             if breaking > 3:
                 print ("\nNot getting any more posts, ending scrolling.") 
                 sleep(2)
                 break
+
             previouslen = len(links2)   
           ##
 
     except NoSuchElementException as err:
         print('- Something went terribly wrong\n')
+
+    if len(links2) == 0:
+        return -1
 
     post_infos = []
 

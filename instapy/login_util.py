@@ -133,21 +133,21 @@ def login_user(browser,
     # Might cause problems if the OS language is english
     if switch_language:
         browser.find_element_by_xpath(
-          "//select[@class='_fsoey']/option[text()='English']").click()
+          "//select[@class='hztqj']/option[text()='English']").click()
 
     # Check if the first div is 'Create an Account' or 'Log In'
     login_elem = browser.find_element_by_xpath(
         "//article/div/div/p/a[text()='Log in']")
     if login_elem is not None:
         ActionChains(browser).move_to_element(login_elem).click().perform()
-
+    sleep(1)
     # Enter username and password and logs the user in
     # Sometimes the element name isn't 'Username' and 'Password'
     # (valid for placeholder too)
-    input_username = browser.find_elements_by_xpath(
+    input_username = browser.find_element_by_xpath(
         "//input[@name='username']")
 
-    ActionChains(browser).move_to_element(input_username[0]). \
+    ActionChains(browser).move_to_element(input_username). \
         click().send_keys(username).perform()
     sleep(1)
     input_password = browser.find_elements_by_xpath(

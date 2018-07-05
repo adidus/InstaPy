@@ -2218,6 +2218,13 @@ class InstaPy:
                 self.logger.info('Extracting information from ' + username)
                 information = extract_information(self.browser, username, limit_amount)
 
+                if information == None :
+                    print(username + "was skipped because couldn`t get user profile\n")
+                    continue
+                elif information == -1:
+                    print(username + " was skipped because user has private accounts\n")
+                    continue
+
                 print(self.export(information))
 
                 total_accounts += 1
