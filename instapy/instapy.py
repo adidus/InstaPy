@@ -8,7 +8,7 @@ import os
 from platform import python_version
 from datetime import datetime
 import random
-
+import platform
 import selenium
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -52,7 +52,11 @@ from .commenters_util import extract_post_info
 from .commenters_util import extract_information
 from .commenters_util import users_liked
 from .commenters_util import get_photo_urls_from_profile
-from .extractor import extract_information, all_extract_post_info
+from .extractor import extract_information
+from .extractor import all_extract_post_info
+from .extractor import difference_between_two_list
+from .extractor import instaimport
+from .config import apiserver, http_login, http_password, port, maincollection, mainindex
 
 
 class InstaPyError(Exception):
@@ -86,7 +90,7 @@ class InstaPy:
         self.proxy_address = proxy_address
         self.proxy_port = proxy_port
         self.proxy_chrome_extension = proxy_chrome_extension
-
+        self.old_feeds_link = []
         self.username = username or os.environ.get('INSTA_USER')
         self.password = password or os.environ.get('INSTA_PW')
         self.nogui = nogui
@@ -239,8 +243,11 @@ class InstaPy:
             self.browser = webdriver.Firefox(firefox_profile=firefox_profile)
 
         else:
-            chromedriver_location = Settings.chromedriver_location
-            #chromedriver_location = "C:\\Users\\user\\instapy\\InstaPy\\assets\\chromedriver\\chromedriver.exe"
+            if platform.system() == 'Linux':
+                chromedriver_location = "/usr/local/bin/chromedriver"
+            else:
+                BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                chromedriver_location = os.path.join(BASE_DIR, 'assets/chromedriver/chromedriver.exe')
             chrome_options = Options()
             chrome_options.add_argument('--dns-prefetch-disable')
             chrome_options.add_argument('--no-sandbox')
@@ -2202,30 +2209,47 @@ class InstaPy:
         self.logger.info("Waiting 10 sec")
         self.browser.implicitly_wait(10)
         #path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
-        path_to_profiles = '../profiles/'
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
         try:
-
+            relax_point = random.randint(15, 20)
+            total_accounts = 0
             for username in usernames:
                 self.logger.info('Extracting information from ' + username)
-                information, user_commented_list = extract_information(self.browser, username, limit_amount)
+                information = extract_information(self.browser, username, limit_amount)
 
-                with open(path_to_profiles + username + '.json', 'w') as fp:
-                    fp.write(json.dumps(information, indent=4))
-                                                             
-                print ("Number of users who commented on his/her profile is ", len(user_commented_list),"\n")
-                file = open(path_to_profiles + username + "_commenters.txt","w") 
-                for line in user_commented_list:
-                    file.write(str(line))
-                    file.write('\t\n')
-                file.close()     
-                self.logger.info("\nFinished. The json file and nicknames of users who commented were saved in profiles directory.\n")
+                if information == None :
+                    print(username + "was skipped because couldn`t get user profile\n")
+                    continue
+                elif information == -1:
+                    print(username + " was skipped because user has private accounts\n")
+                    continue
+
+                print(self.export(information))
+
+                total_accounts += 1
+
+                if total_accounts == relax_point :
+                    time_for_sleeping = random.randint(600,800)
+                    print("After {0} accounts. I go to sleep on {1} seconds. See you later\n".format(relax_point,time_for_sleeping))
+                    relax_point = random.randint(15, 20)
+                    total_accounts = 0
+                    sleep(time_for_sleeping)
+                    print("I start working\n")
+
+
+                #with open(path_to_profiles + username + '.json', 'w') as fp:
+                #    fp.write(json.dumps(information, indent=4))
+                #self.logger.info("\nFinished. The json file of usesaved in profiles directory.\n")
 
         except KeyboardInterrupt:
             print('Aborted...')
+
     def feeds_to_json(self,limit_amount=8):
         """
             limit_amount need to be multiple 8
         """
+
         num_of_search = 0
         amount = 0
         links = []
@@ -2239,64 +2263,33 @@ class InstaPy:
             num_of_search += 1
             num_of_links = len(links) + 1
         posts_info = []    
-        browser_ = self.browser
         counter = 1
+        links = difference_between_two_list(links,self.old_feeds_link)[:]
+        
         for link in links:
-            
             print ("\n", counter , "/", len(links))
             counter = counter + 1
-      
+            link = link + '?__a=1'
+            self.browser.get(link)
+            sleep(2)
             print ("\nScrapping link: ", link)
-            browser_.get(link)
             try:
-                post = self.browser.find_element_by_class_name('_622au')
-                username = post.find_element_by_class_name('_iadoq').text
-
-                caption=''
-                location_url = ''
-                location_name = ''
-                location_id = ''
-                lat = ''
-                lng = '' 
-                img = ''
-                tags = []
-                likes = 0
-                comments = 0
-                date = ''
-                user_commented_list = []
-
-                caption, location_url, location_name, location_id, lat, lng, img, tags, likes, comments, date, user_commented_list = all_extract_post_info(browser_)
-
-                location = {
-                    'location_url': location_url,
-                    'location_name': location_name,
-                    'location_id': location_id,
-                    'latitude': lat,
-                    'longitude': lng
-                  }
-
-                posts_info.append({
-                    'username' : username,
-                    'caption': caption,
-                    'location': location,
-                    'img': img,
-                    'date': date,
-                    'tags': tags,
-                    'likes': likes,
-                    'comments': comments,
-                    'user_commented': user_commented_list
-                  })
-              
+                post = all_extract_post_info(self.browser)
+                posts_info.append(post)
             except NoSuchElementException:
                 print('- Could not get information from post: ' + link)
 
-        path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
+        #path_to_profiles = 'C:\\Users\\user\\instapy\\InstaPy\\profiles\\'
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path_to_profiles = os.path.join(BASE_DIR, 'profiles/')
         time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+        self.old_feeds_link = links[:]
         with open(path_to_profiles + str(time) + '.json', 'w') as fp:
             fp.write(json.dumps(posts_info, indent=4))
-        self.logger.info("\nFinished. The json were saved in profiles directory.\n")     
+        self.logger.info("\nFinished. The json of news has saved in profiles directory.\n")  
         return self
 
-	
-	
+    def export(self,json = None):
+        result = instaimport(maincollection, mainindex, json)
+        return result
 

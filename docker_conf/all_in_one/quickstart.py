@@ -2,8 +2,8 @@
 import json
 from instapy import InstaPy
 
-insta_username = 'zeusfsx'
-insta_password = 'instagrambot'
+insta_username = ''
+insta_password = ''
 
 # if you want to run this script on a server,
 # simply add nogui=True to the InstaPy() constructor
