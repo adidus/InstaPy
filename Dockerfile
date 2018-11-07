@@ -65,8 +65,10 @@ RUN apt-get clean \
 
 # Adding InstaPy
 RUN mkdir InstaPy \
+    && mkdir InstaPy/instapy \
+    && mkdir InstaPy/logs \
     && mkdir InstaPy/assets \
-    wget ${CRHOMEDRIVER} \
+    && wget ${CRHOMEDRIVER} \
     && unzip chromedriver_linux64 \
     && mv chromedriver InstaPy/assets/chromedriver \
     && chmod +x InstaPy/assets/chromedriver \
@@ -75,13 +77,15 @@ RUN mkdir InstaPy \
     && pip install . \
     && pip install langdetect \
     && pip install daemonize \
-    && pip install arrow \
+    && pip install arrow elasticsearch\
     && pip install selenium clarifai pyvirtualdisplay emoji GitPython
 
 # Copying the your quickstart file into the container and setting directory
 COPY docker_conf/all_in_one/quickstart.py ./InstaPy
 WORKDIR /InstaPy
 ADD /* ./
+ADD /instapy/ ./instapy/
+ADD /logs/ ./logs/
 
 CMD ["python3.5", "quickstart.py"]
 
