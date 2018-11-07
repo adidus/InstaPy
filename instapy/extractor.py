@@ -125,7 +125,7 @@ def extract_information(browser, username, limit_amount, logger):
             'shortcode': node["node"]["shortcode"],
             'comments_count': node["node"]["edge_media_to_comment"]["count"],
             'timestamp': node["node"]["taken_at_timestamp"],
-            'foundtime': int(time.timestamp()),
+            'foundtime': node["node"]["taken_at_timestamp"],
             'like_count': node["node"]["edge_media_preview_like"]["count"],
             'owner': node["node"]["owner"]["id"],
             'url': "https://www.instagram.com/p/" + node["node"]["shortcode"]
